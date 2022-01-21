@@ -39,7 +39,7 @@ const ACTIONS = {
 
   create(_, payload) {
     const { user, data } = payload;
-    return assetsService.createAsset(user, data);
+    return assetsService.createFungibleToken(user, data);
   }
 };
 

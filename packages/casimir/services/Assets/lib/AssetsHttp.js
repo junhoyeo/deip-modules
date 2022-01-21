@@ -4,12 +4,20 @@ import { createInstanceGetter } from '@deip/toolbox';
 export class AssetsHttp {
   http = HttpService.getInstance();
 
-  async createAsset(req) {
-    return this.http.post('/api/v2/asset/create', req.getHttpBody());
+  async createFungibleToken(req) {
+    return this.http.post('/api/v2/asset/ft/create', req.getHttpBody());
   }
 
-  async issueAsset(req) {
-    return this.http.post('/api/v2/asset/issue', req.getHttpBody());
+  async createNonFungibleToken(req) {
+    return this.http.post('/api/v2/asset/nft/create', req.getHttpBody());
+  }
+
+  async issueFungibleToken(req) {
+    return this.http.post('/api/v2/asset/ft/issue', req.getHttpBody());
+  }
+
+  async issueNonFungibleToken(req) {
+    return this.http.post('/api/v2/asset/nft/issue', req.getHttpBody());
   }
 
   async transferAssets(req) {

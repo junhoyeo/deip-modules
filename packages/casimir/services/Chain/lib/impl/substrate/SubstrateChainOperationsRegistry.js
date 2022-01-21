@@ -325,23 +325,21 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
 
 
 
-    [APP_CMD.CREATE_ASSET]: ({
+    [APP_CMD.CREATE_FT]: ({
       entityId,
       issuer,
       symbol,
       name,
       precision,
       maxSupply,
-      minBalance,
-      projectTokenOption
+      minBalance
     }) => {
 
-      const createAssetOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
+      const createFungibleTokenOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
         chainNodeClient.tx.deipAssets.createAsset(
           /* assetId: */ `0x${entityId}`,
           /* admin: */ { Dao: `0x${issuer}` },
-          /* min_balance: */ minBalance || 1,
-          /* project_id: */ projectTokenOption ? `0x${projectTokenOption.projectId}` : null
+          /* min_balance: */ minBalance || 1
         )
       );
 
@@ -363,18 +361,60 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
         )
       );
 
-      return [createAssetOp, setAssetMetaOp, setAssetTeamOp];
+      return [createFungibleTokenOp, setAssetMetaOp, setAssetTeamOp];
     },
 
 
-    [APP_CMD.ISSUE_ASSET]: ({
+    [APP_CMD.CREATE_NFT]: ({
+      entityId,
+      issuer,
+      symbol,
+      name,
+      precision,
+      maxSupply,
+      minBalance,
+      projectTokenSettings
+    }) => {
+
+      const createNonFungibleTokenOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
+        chainNodeClient.tx.deipAssets.createAsset(
+          /* assetId: */ `0x${entityId}`,
+          /* admin: */ { Dao: `0x${issuer}` },
+          /* min_balance: */ minBalance || 1,
+          /* project_id: */ projectTokenSettings ? `0x${projectTokenSettings.projectId}` : null
+        )
+      );
+
+      const setAssetMetaOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
+        chainNodeClient.tx.deipAssets.setMetadata(
+          /* assetId: */ `0x${entityId}`,
+          /* name */ name,
+          /* symbol */ symbol,
+          /* decimals */ precision
+        )
+      );
+
+      const setAssetTeamOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
+        chainNodeClient.tx.deipAssets.setTeam(
+          /* assetId: */ `0x${entityId}`,
+          /* issuer */ { Dao: `0x${issuer}` },
+          /* admin */ { Dao: `0x${issuer}` },
+          /* freezer */ { Dao: `0x${issuer}` }
+        )
+      );
+
+      return [createNonFungibleTokenOp, setAssetMetaOp, setAssetTeamOp];
+    },
+
+
+    [APP_CMD.ISSUE_FT]: ({
       issuer,
       asset,
       recipient,
       memo
     }) => {
 
-      const issueAssetOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
+      const issueFungibleTokenOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
         chainNodeClient.tx.deipAssets.issueAsset(
           /* assetId: */ `0x${asset.id}`,
           /* beneficiary */ { Dao: `0x${recipient}` },
@@ -382,7 +422,26 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
         )
       );
 
-      return [issueAssetOp];
+      return [issueFungibleTokenOp];
+    },
+
+
+    [APP_CMD.ISSUE_NFT]: ({
+      issuer,
+      asset,
+      recipient,
+      memo
+    }) => {
+
+      const issueNonFungibleTokenOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
+        chainNodeClient.tx.deipAssets.issueAsset(
+          /* assetId: */ `0x${asset.id}`,
+          /* beneficiary */ { Dao: `0x${recipient}` },
+          /* amount */ asset.amount
+        )
+      );
+
+      return [issueNonFungibleTokenOp];
     },
 
 

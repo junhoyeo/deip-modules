@@ -56,6 +56,7 @@ export class ProjectService {
 
     const env = this.proxydi.get('env');
     const { TENANT, CORE_ASSET } = env;
+
     const isNewProjectTeam = teamId === null;
 
     return Promise.all([
@@ -138,7 +139,7 @@ export class ProjectService {
                 const projectProposalId = createProposalCmd.getProtocolEntityId();
                 const updateProposalCmd = new AcceptProposalCmd({
                   entityId: projectProposalId,
-                  account: creator
+                  account: teamId
                 });
 
                 txBuilder.addCmd(updateProposalCmd);

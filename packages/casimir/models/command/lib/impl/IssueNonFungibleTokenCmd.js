@@ -1,9 +1,9 @@
-import ProtocolCmd from './../base/ProtocolCmd';
+import ProtocolCmd from '../base/ProtocolCmd';
 import { APP_CMD } from '@deip/constants';
 import { assert } from '@deip/toolbox';
 
 
-class IssueAssetCmd extends ProtocolCmd {
+class IssueNonFungibleTokenCmd extends ProtocolCmd {
 
   constructor(cmdPayload) {
 
@@ -25,10 +25,10 @@ class IssueAssetCmd extends ProtocolCmd {
     )
     assert(!!recipient, "'recipient' is required");
 
-    super(APP_CMD.ISSUE_ASSET, cmdPayload);
+    super(APP_CMD.ISSUE_NFT, cmdPayload);
   }
 
 }
 
 
-export default IssueAssetCmd;
+export default IssueNonFungibleTokenCmd;

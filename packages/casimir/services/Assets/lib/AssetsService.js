@@ -5,8 +5,10 @@ import {
   AcceptProposalCmd,
   CreateProposalCmd,
   TransferAssetCmd,
-  CreateAssetCmd,
-  IssueAssetCmd
+  CreateFungibleTokenCmd,
+  CreateNonFungibleTokenCmd,
+  IssueFungibleTokenCmd,
+  IssueNonFungibleTokenCmd
 } from '@deip/command-models';
 import { APP_PROPOSAL } from '@deip/constants';
 import { AccessService } from '@deip/access-service';
@@ -80,13 +82,12 @@ export class AssetsService {
       });
   }
 
-  createAsset({ privKey }, {
+  createFungibleToken({ privKey }, {
     symbol,
     issuer,
     precision,
     maxSupply,
     description,
-    projectTokenOption,
     holders
   }) {
     const env = this.proxydi.get('env');
@@ -99,22 +100,21 @@ export class AssetsService {
         return chainTxBuilder.begin()
           .then((txBuilder) => {
             const entityId = genRipemd160Hash(symbol);
-            const createAssetCmd = new CreateAssetCmd({
+            const createFungibleTokenCmd = new CreateFungibleTokenCmd({
               entityId,
               issuer,
               symbol,
               precision,
               maxSupply,
-              description,
-              projectTokenOption
+              description
             });
-            txBuilder.addCmd(createAssetCmd);
-            const tokenId = createAssetCmd.getProtocolEntityId();
+            txBuilder.addCmd(createFungibleTokenCmd);
+            const tokenId = createFungibleTokenCmd.getProtocolEntityId();
 
             if (holders && holders.length) {
               for (let i = 0; i < holders.length; i++) {
                 const { account, asset } = holders[i];
-                const issueAssetCmd = new IssueAssetCmd({
+                const issueFungibleTokenCmd = new IssueFungibleTokenCmd({
                   asset: {
                     ...asset,
                     id: tokenId
@@ -122,7 +122,7 @@ export class AssetsService {
                   issuer,
                   recipient: account
                 });
-                txBuilder.addCmd(issueAssetCmd);
+                txBuilder.addCmd(issueFungibleTokenCmd);
               }
             }
 
@@ -131,12 +131,68 @@ export class AssetsService {
           .then((packedTx) => packedTx.signAsync(privKey, chainNodeClient))
           .then((packedTx) => {
             const msg = new JsonDataMsg(packedTx.getPayload());
-            return this.assetsHttp.createAsset(msg);
+            return this.assetsHttp.createFungibleToken(msg);
           });
       });
   }
 
-  issueAsset({ privKey }, {
+  createNonFungibleToken({ privKey }, {
+    symbol,
+    issuer,
+    precision,
+    maxSupply,
+    description,
+    projectTokenSettings,
+    holders
+  }) {
+    const env = this.proxydi.get('env');
+
+    return ChainService.getInstanceAsync(env)
+      .then((chainService) => {
+        const chainNodeClient = chainService.getChainNodeClient();
+        const chainTxBuilder = chainService.getChainTxBuilder();
+
+        return chainTxBuilder.begin()
+          .then((txBuilder) => {
+            const entityId = genRipemd160Hash(symbol);
+            const createNonFungibleTokenCmd = new CreateNonFungibleTokenCmd({
+              entityId,
+              issuer,
+              symbol,
+              precision,
+              maxSupply,
+              description,
+              projectTokenSettings
+            });
+            txBuilder.addCmd(createNonFungibleTokenCmd);
+            const tokenId = createNonFungibleTokenCmd.getProtocolEntityId();
+
+            if (holders && holders.length) {
+              for (let i = 0; i < holders.length; i++) {
+                const { account, asset } = holders[i];
+                const issueNonFungibleTokenCmd = new IssueNonFungibleTokenCmd({
+                  asset: {
+                    ...asset,
+                    id: tokenId
+                  },
+                  issuer,
+                  recipient: account
+                });
+                txBuilder.addCmd(issueNonFungibleTokenCmd);
+              }
+            }
+
+            return txBuilder.end();
+          })
+          .then((packedTx) => packedTx.signAsync(privKey, chainNodeClient))
+          .then((packedTx) => {
+            const msg = new JsonDataMsg(packedTx.getPayload());
+            return this.assetsHttp.createNonFungibleToken(msg);
+          });
+      });
+  }
+
+  issueFungibleToken({ privKey }, {
     issuer,
     asset,
     recipient
@@ -150,17 +206,46 @@ export class AssetsService {
 
         return chainTxBuilder.begin()
           .then((txBuilder) => {
-            const issueAssetCmd = new IssueAssetCmd({
+            const issueFungibleTokenCmd = new IssueFungibleTokenCmd({
               issuer,
               asset,
               recipient
             });
-            txBuilder.addCmd(issueAssetCmd);
+            txBuilder.addCmd(issueFungibleTokenCmd);
           })
           .then((packedTx) => packedTx.signAsync(privKey, chainNodeClient))
           .then((packedTx) => {
             const msg = new JsonDataMsg(packedTx.getPayload());
-            return this.assetsHttp.issueAsset(msg);
+            return this.assetsHttp.issueFungibleToken(msg);
+          });
+      });
+  }
+
+  issueNonFungibleToken({ privKey }, {
+    issuer,
+    asset,
+    recipient
+  }) {
+    const env = this.proxydi.get('env');
+
+    return ChainService.getInstanceAsync(env)
+      .then((chainService) => {
+        const chainNodeClient = chainService.getChainNodeClient();
+        const chainTxBuilder = chainService.getChainTxBuilder();
+
+        return chainTxBuilder.begin()
+          .then((txBuilder) => {
+            const issueNonFungibleTokenCmd = new IssueNonFungibleTokenCmd({
+              issuer,
+              asset,
+              recipient
+            });
+            txBuilder.addCmd(issueNonFungibleTokenCmd);
+          })
+          .then((packedTx) => packedTx.signAsync(privKey, chainNodeClient))
+          .then((packedTx) => {
+            const msg = new JsonDataMsg(packedTx.getPayload());
+            return this.assetsHttp.issueNonFungibleToken(msg);
           });
       });
   }

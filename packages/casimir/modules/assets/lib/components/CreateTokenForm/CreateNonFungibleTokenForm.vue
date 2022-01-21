@@ -410,7 +410,7 @@
             precision: DEFAULT_PRECISION,
             maxSupply: parseInt(this.formModel.maxSupply),
             description: '',
-            projectTokenOption: {
+            projectTokenSettings: {
               projectId: this.project._id,
               teamId: this.team._id,
               licenseRevenue: {
