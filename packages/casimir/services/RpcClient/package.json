@@ -19,7 +19,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://gitlab.com/DEIP/deip-rpc.git#open-access"
+        "url": "git+https://github.com/DEIPworld/deip-modules.git"
     },
     "keywords": [
         "deip",
