@@ -1,18 +1,18 @@
 import { blocksGenerator } from '@deip/vue-layout-schema';
-import FundraisingWidget from '../components/Widget/FundraisingWidget';
+import CrowdfundingWidget from '../components/crowdfunding/Widget/CrowdfundingWidget';
 
-export const fundraisingBlocks = {
-  title: 'Fundraising',
+export const сrowdfundingBlocks = {
+  title: 'Crowdfunding',
   blocks: [
     ...blocksGenerator([
       {
-        component: FundraisingWidget,
+        component: CrowdfundingWidget,
         data: {
           props: {
-            projectId: '{{fundraisingWidget.projectId}}',
-            canUserStartFundraising: '{{canEdit}}',
-            investLink: '{{fundraisingWidget.investLink}}',
-            startFundraisingLink: '{{fundraisingWidget.startFundraisingLink}}'
+            projectId: '{{сrowdfundingWidget.projectId}}',
+            canUserStartCrowdfunding: '{{canEdit}}',
+            investLink: '{{crowdfundingWidget.investLink}}',
+            startCrowdfundingLink: '{{сrowdfundingWidget.startCrowdfundingLink}}'
           }
         },
         icon: 'mdi-cash',
@@ -20,8 +20,8 @@ export const fundraisingBlocks = {
         disabledProps: [
           'projectId',
           'investLink',
-          'startFundraisingLink',
-          'canUserStartFundraising'
+          'startCrowdfundingLink',
+          'canUserStartCrowdfunding'
         ],
         blockType: 'simple'
       }
