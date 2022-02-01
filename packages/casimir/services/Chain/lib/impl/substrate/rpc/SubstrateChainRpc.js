@@ -41,7 +41,7 @@ class SubstrateChainRpc extends BaseChainRpc {
           decimals: coreAsset.precision
         }
 
-      const metadataOpt = await api.query.deipAssets.assetMetadataMap(toHexFormat(assetId));
+      const metadataOpt = await api.query.assets.assetMetadataMap(toHexFormat(assetId));
       const metadata = metadataOpt.isSome ? metadataOpt.unwrap() : null;
       if (!metadata) return null;
       return {
@@ -360,7 +360,7 @@ class SubstrateChainRpc extends BaseChainRpc {
 
       getProjectAssetsAsync: async (projectId) => {
         const api = chainService.getChainNodeClient();
-        const assetsOpt = await api.query.deipAssets.assetIdByProjectId(toHexFormat(projectId));
+        const assetsOpt = await api.query.assets.assetIdByProjectId(toHexFormat(projectId));
         const assets = assetsOpt.isSome ? assetsOpt.unwrap() : null;
         if (!assets) return [];
         const assetsDtos = await Promise.all(assets.map((assetId) => this.getAssetAsync(u8aToHex(assetId))));

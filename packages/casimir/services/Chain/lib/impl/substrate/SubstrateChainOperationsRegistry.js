@@ -337,7 +337,7 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
     }) => {
 
       const createAssetOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
-        chainNodeClient.tx.deipAssets.createAsset(
+        chainNodeClient.tx.assets.deipCreateAsset(
           /* assetId: */ `0x${entityId}`,
           /* admin: */ { Dao: `0x${issuer}` },
           /* min_balance: */ minBalance || 1,
@@ -346,7 +346,7 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
       );
 
       const setAssetMetaOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
-        chainNodeClient.tx.deipAssets.setMetadata(
+        chainNodeClient.tx.assets.deipSetMetadata(
           /* assetId: */ `0x${entityId}`,
           /* name */ name,
           /* symbol */ symbol,
@@ -355,7 +355,7 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
       );
 
       const setAssetTeamOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
-        chainNodeClient.tx.deipAssets.setTeam(
+        chainNodeClient.tx.assets.deipSetTeam(
           /* assetId: */ `0x${entityId}`,
           /* issuer */ { Dao: `0x${issuer}` },
           /* admin */ { Dao: `0x${issuer}` },
@@ -375,7 +375,7 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
     }) => {
 
       const issueAssetOp = chainNodeClient.tx.deipDao.onBehalf(`0x${issuer}`,
-        chainNodeClient.tx.deipAssets.issueAsset(
+        chainNodeClient.tx.assets.deipIssueAsset(
           /* assetId: */ `0x${asset.id}`,
           /* beneficiary */ { Dao: `0x${recipient}` },
           /* amount */ asset.amount
@@ -510,7 +510,7 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
       memo
     }) => {
 
-      const toAddress = isValidPubKey(`0x${to}`) ? pubKeyToAddress(`0x${to}`) : daoIdToAddress(`0x${to}`, chainNodeClient.registry);
+      const toAddress = isAddress(to) ? to : isValidPubKey(`0x${to}`) ? pubKeyToAddress(`0x${to}`) : daoIdToAddress(`0x${to}`, chainNodeClient.registry);
       
       if (asset.id == coreAsset.id) {
         const transferCoreAssetOp = chainNodeClient.tx.deipDao.onBehalf(`0x${from}`,
@@ -522,7 +522,7 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
         return [transferCoreAssetOp];
       } else {
         const transferAssetOp = chainNodeClient.tx.deipDao.onBehalf(`0x${from}`, 
-          chainNodeClient.tx.deipAssets.transfer(
+          chainNodeClient.tx.assets.deipTransfer(
             /* assetId: */ `0x${asset.id}`,
             /* to: */ { Native: toAddress },
             /* amount: */ asset.amount
@@ -530,6 +530,25 @@ const SUBSTRATE_OP_CMD_MAP = (chainNodeClient, {
         );
         return [transferAssetOp];
       }
+
+    },
+
+
+    [APP_CMD.CREATE_PORTAL]: ({
+      entityId,
+      owner,
+      delegate,
+      metadata
+    }) => {
+
+      const createPortalOp = chainNodeClient.tx.deipDao.onBehalf(`0x${owner}`,
+        chainNodeClient.tx.deipPortal.create(
+            /* delegate: */ delegate, // `0x${delegate}`,
+            /* metadata: */ metadata ? `0x${metadata}` : null
+        )
+      );
+
+      return [createPortalOp];
 
     }
 

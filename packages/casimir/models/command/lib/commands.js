@@ -42,6 +42,7 @@ import UpdatePortalSettingsCmd from './impl/UpdatePortalSettingsCmd';
 import CreateBookmarkCmd from './impl/CreateBookmarkCmd';
 import DeleteBookmarkCmd from './impl/DeleteBookmarkCmd';
 import MarkNotificationsAsReadCmd from './impl/MarkNotificationsAsReadCmd';
+import CreatePortalCmd from './impl/CreatePortalCmd';
 
 export {
   CreateDaoCmd,
@@ -87,5 +88,6 @@ export {
   UpdatePortalSettingsCmd,
   CreateBookmarkCmd,
   DeleteBookmarkCmd,
-  MarkNotificationsAsReadCmd
+  MarkNotificationsAsReadCmd,
+  CreatePortalCmd
 }

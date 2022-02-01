@@ -13,12 +13,12 @@ class SubstrateTx extends BaseTx {
   signedInvariant;
   chainMetadata;
 
-  constructor(trx, chainMetadata) {
+  constructor(trx, chainMetadata, portalId) {
 
     assert(!!chainMetadata, "Chain metadata must be specified for the Substrate Transaction");
 
     if (!trx) {
-      super();
+      super(null, [], portalId);
       this.signedInvariant = null;
     } else {
       const { tx, signedInvariant } = trx;
@@ -32,7 +32,7 @@ class SubstrateTx extends BaseTx {
         const op = registry.createType('Extrinsic', call);
         ops.push(op);
       }
-      super(tx, ops);
+      super(tx, ops, portalId);
       this.signedInvariant = signedInvariant;
     }
     
@@ -349,8 +349,10 @@ class SubstrateTx extends BaseTx {
               args: { "calls": signingOps },
               callIndex: api.tx.utility.batchAll.callIndex,
             }, api.tx.utility.batchAll.meta);
+            
+            const tx = api.registry.createType('Extrinsic', batchCall);
 
-            const signingTx = api.registry.createType('Extrinsic', batchCall);
+            const signingTx = this.isOnBehalfPortal() ? api.tx.deipPortal.exec(`0x${this.getPortalId()}`, tx) : tx;
             const signedTx = signingTx.sign(keyring, signingMeta);
             this.signedInvariant = signedTx.toHex();
             return this;
@@ -362,10 +364,35 @@ class SubstrateTx extends BaseTx {
     return !!this.getSignedInvariant();
   }
 
-  signByTenantAsync({ tenant, tenantPrivKey }, api) {
-    assert(super.isFinalized(), 'Transaction is not finalized');
-    // TODO: add extension
-    return Promise.resolve(this);
+  verifyByPortalAsync({ verifier, verificationKey }, api) {
+    assert(!!this.isOnBehalfPortal(), `Transaction is not supposed for tenant verification`);
+    assert(super.isFinalized(), 'Transaction is not finalized for tenant verification');
+    assert(!!this.isSigned(), `Transaction is not signed for tenant verification`);
+
+    return api.derive.tx.signingInfo(verifier)
+      .then((signingInfo) => {
+
+        const signingMeta = {
+          nonce: signingInfo.nonce,
+          blockHash: signingInfo.header.hash,
+          genesisHash: api.genesisHash,
+          era: api.registry.createType('ExtrinsicEra', {
+            current: signingInfo.header.number,
+            period: signingInfo.mortalLength
+          }),
+          signedExtensions: api.registry.signedExtensions,
+          runtimeVersion: api.runtimeVersion,
+          version: api.extrinsicVersion
+        };
+
+        const isSuriPath = verificationKey.indexOf('/') !== -1;
+        const keyring = isSuriPath ? getSeedAccount(verificationKey) : getSeedAccount(`0x${verificationKey}`);
+        
+        const scheduledTx = api.tx.deipPortal.schedule(this.getSignedInvariant());
+        const signedScheduledTx = scheduledTx.sign(keyring, signingMeta);
+        return signedScheduledTx.toHex();
+
+      });
   }
 
   getRawTx() {
@@ -373,10 +400,10 @@ class SubstrateTx extends BaseTx {
     return this.getTx().toHex();
   }
 
-  sendAsync(chainRpc) {
+  getSignedRawTx() {
     assert(super.isFinalized(), 'Transaction is not finalized');
     assert(!!this.isSigned(), `Transaction is not signed for sending`);
-    return chainRpc.sendTxAsync(this.getSignedInvariant());
+    return this.getSignedInvariant();
   }
 
   finalize({ chainNodeClient: api }) {
@@ -393,24 +420,25 @@ class SubstrateTx extends BaseTx {
 
   serialize() {
     assert(super.isFinalized(), 'Transaction is not finalized');
-    return SubstrateTx.Serialize(this, this.chainMetadata);
+    return SubstrateTx.Serialize(this, this.chainMetadata, this.getPortalId());
   }
 
   deserialize(serializedTx, chainMetadata) {
     return SubstrateTx.Deserialize(serializedTx, chainMetadata);
   }
 
-  static Serialize(tx, chainMetadata) {
+  static Serialize(tx, chainMetadata, portalId) {
     assert(!!tx, "Transaction is not specified");
     const rawTx = tx.getRawTx();
     const signedInvariant = tx.getSignedInvariant();
     const chainMetadataHash = genSha256Hash(chainMetadata);
-    return JSON.stringify({ tx: rawTx, signedInvariant, chainMetadataHash });
+    return JSON.stringify({ tx: rawTx, signedInvariant, portalId, chainMetadataHash });
   }
 
   static Deserialize(serializedTx, chainMetadata) {
     const finalizedTx = JSON.parse(serializedTx);
-    return new SubstrateTx(finalizedTx, chainMetadata);
+    const { portalId } = finalizedTx;
+    return new SubstrateTx(finalizedTx, chainMetadata, portalId);
   }
 
 }
