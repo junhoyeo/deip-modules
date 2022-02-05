@@ -13,7 +13,8 @@ class CreateFungibleTokenCmd extends ProtocolEntityCmd {
       symbol,
       precision,
       maxSupply,
-      description
+      description,
+      projectTokenSettings
     } = cmdPayload;
 
     assert(!!issuer, "'issuer' is required");

@@ -10,11 +10,13 @@ class AcceptProposalCmd extends ProtocolCmd {
     const {
       // onchain
       entityId,
-      account
+      account,
+      batchWeight
     } = cmdPayload;
 
     assert(!!entityId, "'entityId' is required");
     assert(!!account, "'account' is required");
+    assert(!!batchWeight, "'batchWeight' is required");
 
     super(APP_CMD.ACCEPT_PROPOSAL, cmdPayload);
   }

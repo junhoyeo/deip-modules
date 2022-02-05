@@ -11,7 +11,6 @@ class IssueNonFungibleTokenCmd extends ProtocolCmd {
       issuer,
       asset,
       recipient,
-      memo
     } = cmdPayload;
 
     assert(!!issuer, "'issuer' is required");

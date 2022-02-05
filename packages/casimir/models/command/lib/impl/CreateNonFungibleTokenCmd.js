@@ -31,7 +31,7 @@ class CreateNonFungibleTokenCmd extends ProtocolEntityCmd {
       assert(!!holdersShare, "'holdersShare' is required for project 'licenseRevenue' option");
     }
 
-    super(APP_CMD.CREATE_FT, cmdPayload);
+    super(APP_CMD.CREATE_NFT, cmdPayload);
   }
 
 }
