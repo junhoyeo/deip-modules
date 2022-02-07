@@ -103,7 +103,7 @@
 
     computed: {
       investmentOpportunity() {
-        const projectInvestmentOpportunities = this.$store.getters['fundraising/list']({
+        const projectInvestmentOpportunities = this.$store.getters['investmentOpportunity/list']({
           projectId: this.projectId
         });
 
@@ -171,7 +171,7 @@
         } = TS_TYPES;
 
         if (status === INACTIVE) {
-          return this.$store.dispatch('fundraising/getListByProjectId', this.projectId)
+          return this.$store.dispatch('investmentOpportunity/getListByProjectId', this.projectId)
             .catch((error) => { console.error(error); });
         }
 
@@ -184,10 +184,10 @@
       },
 
       getProjectInvestmentOpportunityData() {
-        return this.$store.dispatch('fundraising/getListByProjectId', this.projectId)
+        return this.$store.dispatch('investmentOpportunity/getListByProjectId', this.projectId)
           .then(() => {
             if (this.investmentOpportunity) {
-              this.$store.dispatch('fundraising/getInvestmentOpportunityInvestments', this.investmentOpportunity._id);
+              this.$store.dispatch('investmentOpportunity/getInvestmentOpportunityInvestments', this.investmentOpportunity._id);
             }
           })
           .catch((error) => {

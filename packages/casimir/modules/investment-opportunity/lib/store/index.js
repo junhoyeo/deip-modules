@@ -112,7 +112,7 @@ const MUTATIONS = {
   setList: setListMutation
 };
 
-export const fundraisingStore = {
+export const investmentOpportunityStore = {
   state: STATE,
   getters: GETTERS,
   actions: ACTIONS,

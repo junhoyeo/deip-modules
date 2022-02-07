@@ -256,7 +256,7 @@
           };
         }
 
-        this.$store.dispatch('fundraising/create', payload)
+        this.$store.dispatch('investmentOpportunity/create', payload)
           .then(() => {
             this.$emit('success');
           })
